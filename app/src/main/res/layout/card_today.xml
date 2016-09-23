@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:id="@+id/pic_weather"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="condition"
+            android:id="@+id/tv_weather_cond"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/pic_weather"
+            android:layout_alignRight="@+id/pic_weather"
+            android:layout_alignEnd="@+id/pic_weather" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/pic_weather"
+            android:id="@+id/relativeLayout">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="low"
+                android:gravity="center"
+                android:id="@+id/tv_temp_low"
+                android:layout_marginRight="30dp"
+                android:layout_marginEnd="30dp"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/tv_temp_now"
+                android:layout_toStartOf="@+id/tv_temp_now" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="now"
+                android:textSize="40dp"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:id="@+id/tv_temp_now"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="high"
+                android:gravity="center"
+                android:id="@+id/tv_temp_high"
+                android:layout_marginRight="30dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="30dp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/relativeLayout"
+            android:layout_toRightOf="@+id/pic_weather"
+            android:layout_toEndOf="@+id/pic_weather"
+            android:id="@+id/relativeLayout2">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/feel_temp"
+                android:id="@+id/tv_feel_temp"
+                android:layout_gravity="center_horizontal"
+                android:layout_alignParentTop="true"
+                android:layout_alignLeft="@+id/tv_air_aqi"
+                android:layout_alignStart="@+id/tv_air_aqi" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/air_aqi"
+                android:id="@+id/tv_air_aqi"
+                android:layout_gravity="center_horizontal"
+                android:layout_below="@+id/tv_feel_temp"
+                android:layout_centerHorizontal="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/air_qlty"
+                android:id="@+id/tv_air_qlty"
+                android:layout_gravity="center_horizontal"
+                android:layout_below="@+id/tv_air_aqi"
+                android:layout_alignLeft="@+id/tv_air_aqi"
+                android:layout_alignStart="@+id/tv_air_aqi" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_feel_temp_data"
+                android:layout_alignLeft="@+id/tv_air_aqi_data"
+                android:layout_alignTop="@+id/tv_feel_temp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_air_aqi_data"
+                android:layout_toRightOf="@+id/tv_air_aqi"
+                android:layout_alignTop="@+id/tv_air_aqi" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_air_qlty_data"
+                android:layout_alignLeft="@+id/tv_air_aqi_data"
+                android:layout_alignTop="@+id/tv_air_qlty" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

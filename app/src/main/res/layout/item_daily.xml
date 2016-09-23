@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_marginBottom="10dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        android:id="@+id/relativeLayout4">
+
+        <ImageView android:layout_height="48dp"
+            android:layout_width="48dp"
+            android:id="@+id/pic_daily_cond_day"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"/>
+
+        <ImageView android:layout_height="48dp"
+            android:layout_width="48dp"
+            android:id="@+id/pic_daily_cond_night"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/pic_daily_cond_day"
+            android:layout_toRightOf="@+id/pic_daily_cond_day"/>
+
+        <TextView android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/tv_daily_cond"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignEnd="@+id/pic_daily_cond_night"
+            android:layout_alignRight="@+id/pic_daily_cond_night"
+            android:layout_below="@+id/pic_daily_cond_day"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:text="condition"/>
+
+    </RelativeLayout>
+
+    <TextView android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:id="@+id/tv_daily_date"
+        android:textColor="@android:color/black"
+        android:text="date"
+        android:gravity="center"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:textSize="20dp"
+        android:layout_alignTop="@+id/relativeLayout4"
+        android:layout_toRightOf="@+id/relativeLayout4"
+        android:layout_alignRight="@+id/relativeLayout3"
+        android:layout_alignEnd="@+id/relativeLayout3" />
+
+    <RelativeLayout android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:id="@+id/relativeLayout3"
+        android:layout_marginLeft="3dp"
+        android:layout_below="@+id/tv_daily_date"
+        android:layout_alignBottom="@+id/relativeLayout4"
+        android:layout_toRightOf="@+id/relativeLayout4">
+
+        <ImageView android:layout_height="24dp"
+            android:layout_width="24dp"
+            android:id="@+id/pic_daily_temp"
+            android:background="@drawable/temperature"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/tv_daily_temp"
+            android:textColor="@android:color/black"
+            android:text="temperature"
+            android:layout_marginLeft="5dp"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/pic_daily_temp"
+            android:layout_toEndOf="@+id/pic_daily_temp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/relativeLayout3"
+        android:layout_toRightOf="@+id/relativeLayout3"
+        android:layout_alignBottom="@+id/relativeLayout3">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:id="@+id/linearLayout">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pop"
+                android:id="@+id/tv_daily_pop"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="5dp"
+                android:layout_below="@+id/tv_daily_wind"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/hum"
+                android:id="@+id/tv_daily_hum"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginBottom="5dp"
+                android:layout_below="@+id/tv_daily_pop"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_toRightOf="@+id/linearLayout"
+            android:layout_toEndOf="@+id/linearLayout">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="pop"
+                android:id="@+id/tv_daily_pop_data"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_below="@+id/tv_daily_wind_data"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hum"
+                android:id="@+id/tv_daily_hum_data"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="5dp"
+                android:layout_below="@+id/tv_daily_pop_data"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>
