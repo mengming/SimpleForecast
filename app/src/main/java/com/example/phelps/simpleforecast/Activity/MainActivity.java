@@ -25,14 +25,18 @@ import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.example.phelps.simpleforecast.Adapter.IndicatorAdapter;
 import com.example.phelps.simpleforecast.Base.JsonReader;
+import com.example.phelps.simpleforecast.Base.MyInterface;
 import com.example.phelps.simpleforecast.Base.RxBus;
 import com.example.phelps.simpleforecast.Data.CityData;
 import com.example.phelps.simpleforecast.Data.CityEvent;
+import com.example.phelps.simpleforecast.Data.CityListEvent;
 import com.example.phelps.simpleforecast.Data.CityObject;
 import com.example.phelps.simpleforecast.Data.WeatherData;
+import com.example.phelps.simpleforecast.Fragment.CityControlDialog;
 import com.example.phelps.simpleforecast.Fragment.NewCityDialog;
 import com.example.phelps.simpleforecast.R;
 import com.google.gson.Gson;
+import com.google.gson.internal.Streams;
 import com.tbruyelle.rxpermissions.RxPermissions;
 import com.viewpagerindicator.TabPageIndicator;
 
@@ -197,17 +201,22 @@ public class MainActivity extends AppCompatActivity
                                 pager.setCurrentItem(i);
                             } else {
                                 cityList.add(strCity);
-                                adapter.setCount(cityList.size());
                                 adapter.notifyDataSetChanged();
                                 pager.setCurrentItem(cityList.size() - 1);
                                 indicator.notifyDataSetChanged();
                             }
                         }
+                        else if (event instanceof CityListEvent) {
+                            cityList.remove(((CityListEvent) event).getIndex());
+                            System.out.println(cityList.size());
+                            adapter.notifyDataSetChanged();
+                            pager.setCurrentItem(0);
+                            indicator.notifyDataSetChanged();
+                        }
                     }
                 });
         addSubscription(subscription);
     }
-
 
     public void addSubscription(Subscription subscription) {
         if (this.mCompositeSubscription == null) {
@@ -265,9 +274,9 @@ public class MainActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-//        if (id == R.id.menu_city_control) {
-//            showCityControl();
-//        }
+        if (id == R.id.menu_city_control) {
+            showCityControl();
+        }
 
         //noinspection SimplifiableIfStatement
 
@@ -275,7 +284,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void showCityControl() {
-
+        CityControlDialog cityControlDialog = new CityControlDialog();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("cityList", (Serializable) cityList);
+        cityControlDialog.setArguments(bundle);
+        cityControlDialog.show(getFragmentManager(),"cityControl");
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
