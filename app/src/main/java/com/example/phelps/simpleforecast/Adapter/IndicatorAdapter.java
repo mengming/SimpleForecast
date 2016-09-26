@@ -47,7 +47,4 @@ public class IndicatorAdapter extends FragmentPagerAdapter implements IconPagerA
         return cityList.get(position);
     }
 
-    public void setCount(int count) {
-
-    }
 }
