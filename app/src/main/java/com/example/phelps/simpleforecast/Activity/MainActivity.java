@@ -24,29 +24,20 @@ import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.example.phelps.simpleforecast.Adapter.IndicatorAdapter;
-import com.example.phelps.simpleforecast.Base.JsonReader;
-import com.example.phelps.simpleforecast.Base.MyInterface;
 import com.example.phelps.simpleforecast.Base.RxBus;
-import com.example.phelps.simpleforecast.Data.CityData;
+import com.example.phelps.simpleforecast.Data.CityChangeOrderEvent;
 import com.example.phelps.simpleforecast.Data.CityEvent;
-import com.example.phelps.simpleforecast.Data.CityListEvent;
-import com.example.phelps.simpleforecast.Data.CityObject;
+import com.example.phelps.simpleforecast.Data.CityDeleteEvent;
 import com.example.phelps.simpleforecast.Data.WeatherData;
 import com.example.phelps.simpleforecast.Fragment.CityControlDialog;
 import com.example.phelps.simpleforecast.Fragment.NewCityDialog;
 import com.example.phelps.simpleforecast.R;
-import com.google.gson.Gson;
-import com.google.gson.internal.Streams;
 import com.tbruyelle.rxpermissions.RxPermissions;
 import com.viewpagerindicator.TabPageIndicator;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -54,11 +45,8 @@ import butterknife.ButterKnife;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 import rx.Observable;
-import rx.Subscriber;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 public class MainActivity extends AppCompatActivity
@@ -206,9 +194,18 @@ public class MainActivity extends AppCompatActivity
                                 indicator.notifyDataSetChanged();
                             }
                         }
-                        else if (event instanceof CityListEvent) {
-                            cityList.remove(((CityListEvent) event).getIndex());
-                            System.out.println(cityList.size());
+                        else if (event instanceof CityDeleteEvent) {
+                            cityList.remove(((CityDeleteEvent) event).getIndex());
+                            adapter.notifyDataSetChanged();
+                            pager.setCurrentItem(0);
+                            indicator.notifyDataSetChanged();
+                        }
+                        else if (event instanceof CityChangeOrderEvent) {
+                            int start = ((CityChangeOrderEvent) event).getStart();
+                            if (((CityChangeOrderEvent) event).getChangeOrder()) {
+                                Collections.swap(cityList,start,start-1);
+                            }
+                            else Collections.swap(cityList,start,start+1);
                             adapter.notifyDataSetChanged();
                             pager.setCurrentItem(0);
                             indicator.notifyDataSetChanged();
@@ -238,7 +235,6 @@ public class MainActivity extends AppCompatActivity
             if (bdLocation == null) {
                 return;
             } else {
-                System.out.println("have");
                 mCity = bdLocation.getCity();
                 int index = mCity.indexOf("市");
                 mCity = mCity.substring(0, index);

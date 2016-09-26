@@ -1,27 +1,22 @@
 package com.example.phelps.simpleforecast.Fragment;
 
 import android.app.DialogFragment;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.example.phelps.simpleforecast.Base.MyInterface;
 import com.example.phelps.simpleforecast.Base.RxBus;
-import com.example.phelps.simpleforecast.Data.CityListEvent;
+import com.example.phelps.simpleforecast.Data.CityChangeOrderEvent;
+import com.example.phelps.simpleforecast.Data.CityDeleteEvent;
 import com.example.phelps.simpleforecast.R;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -51,6 +46,7 @@ public class CityControlDialog extends DialogFragment {
 
     private class CityAdapter extends BaseAdapter{
 
+        LayoutInflater inflater = LayoutInflater.from(getActivity().getApplicationContext());
         @Override
         public int getCount() {
             return cityList.size();
@@ -68,25 +64,55 @@ public class CityControlDialog extends DialogFragment {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            View view = LayoutInflater.from(getContext()).inflate(R.layout.item_city_control,parent,false);
-            TextView cityText = (TextView) view.findViewById(R.id.tv_item_city_control);
-            cityText.setText(cityList.get(position).toString());
-            Button button = (Button) view.findViewById(R.id.btn_city_delete);
-            button.setOnClickListener(new View.OnClickListener() {
+            ViewHolder viewHolder;
+            if (convertView == null) {
+                convertView = inflater.inflate(R.layout.item_city_control,null);
+                viewHolder = new ViewHolder();
+                viewHolder.cityText = (TextView) convertView.findViewById(R.id.tv_item_city_control);
+                viewHolder.btnDelete = (ImageButton) convertView.findViewById(R.id.btn_city_delete);
+                viewHolder.btnCityUp = (ImageButton) convertView.findViewById(R.id.btn_city_up);
+                viewHolder.btnCityDown = (ImageButton) convertView.findViewById(R.id.btn_city_down);
+                convertView.setTag(viewHolder);
+            }
+            else viewHolder = (ViewHolder) convertView.getTag();
+            if (position == 0) viewHolder.btnCityUp.setEnabled(false);
+            if (position == cityList.size()) viewHolder.btnCityDown.setEnabled(false);
+            viewHolder.cityText.setText(cityList.get(position).toString());
+            viewHolder.btnDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (RxBus.getInstance().hasObservers()) {
-                        RxBus.getInstance().post(new CityListEvent(position));
+                        RxBus.getInstance().post(new CityDeleteEvent(position));
                         adapter.notifyDataSetChanged();
                     }
                 }
             });
-            return view;
+            viewHolder.btnCityUp.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (RxBus.getInstance().hasObservers()) {
+                        RxBus.getInstance().post(new CityChangeOrderEvent(position,position-1));
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            });
+            viewHolder.btnCityDown.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (RxBus.getInstance().hasObservers()) {
+                        RxBus.getInstance().post(new CityChangeOrderEvent(position,position+1));
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+            });
+            return convertView;
         }
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public static class ViewHolder{
+        public TextView cityText;
+        public ImageButton btnDelete;
+        public ImageButton btnCityUp;
+        public ImageButton btnCityDown;
     }
 }
