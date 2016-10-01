@@ -1,7 +1,6 @@
 package com.example.phelps.simpleforecast.Http;
 
-import com.example.phelps.simpleforecast.Activity.MainActivity;
-import com.example.phelps.simpleforecast.Data.WeatherData;
+import com.example.phelps.simpleforecast.Data.AppVersionData;
 
 import java.util.concurrent.TimeUnit;
 
@@ -14,20 +13,19 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 /**
- * Created by Phelps on 2016/8/17.
+ * Created by Phelps on 2016/10/1.
  */
-public class HttpMethods {
-    public static final String BASE_URL = "https://api.heweather.com/x3/";
-    private static String heFengKey = "00f40c947c99410b982f03996c7d1a7c";
 
-    private static final int DEFAULT_TIMEOUT = 5;
+public class HttpUpdate {
 
     private Retrofit retrofit;
+    public static final String APK_URL = "http://119.29.186.49:8000/v1/";
     private RetrofitService retrofitService;
+    private static final int DEFAULT_TIMEOUT = 5;
 
-    private volatile static HttpMethods INSTANCE;
+    private volatile static HttpUpdate INSTANCE;
 
-    private HttpMethods() {
+    private HttpUpdate(){
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
@@ -35,28 +33,27 @@ public class HttpMethods {
                 .client(builder.build())
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .baseUrl(BASE_URL)
+                .baseUrl(APK_URL)
                 .build();
 
         retrofitService = retrofit.create(RetrofitService.class);
     }
 
     //获取单例
-    public static HttpMethods getInstance(){
+    public static HttpUpdate getInstance(){
         if (INSTANCE == null) {
-            synchronized (HttpMethods.class){
-                INSTANCE = new HttpMethods();
+            synchronized (HttpUpdate.class){
+                INSTANCE = new HttpUpdate();
             }
         }
         return INSTANCE;
     }
 
-    public void getWeather(Subscriber<WeatherData> subscriber,String cityName){
-        retrofitService.getWeather(cityName,heFengKey)
+    public void getUpdate(Subscriber<AppVersionData> subscriber){
+        retrofitService.getUpdate()
                 .subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(subscriber);
     }
-
 }

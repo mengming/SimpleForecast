@@ -1,8 +1,11 @@
 package com.example.phelps.simpleforecast.Activity;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
@@ -25,12 +28,16 @@ import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.example.phelps.simpleforecast.Adapter.IndicatorAdapter;
 import com.example.phelps.simpleforecast.Base.RxBus;
+import com.example.phelps.simpleforecast.Data.AppVersionData;
 import com.example.phelps.simpleforecast.Data.CityChangeOrderEvent;
 import com.example.phelps.simpleforecast.Data.CityEvent;
 import com.example.phelps.simpleforecast.Data.CityDeleteEvent;
+import com.example.phelps.simpleforecast.Data.FabEvent;
 import com.example.phelps.simpleforecast.Data.WeatherData;
+import com.example.phelps.simpleforecast.Fragment.AppUpdateDialog;
 import com.example.phelps.simpleforecast.Fragment.CityControlDialog;
 import com.example.phelps.simpleforecast.Fragment.NewCityDialog;
+import com.example.phelps.simpleforecast.Http.HttpUpdate;
 import com.example.phelps.simpleforecast.R;
 import com.tbruyelle.rxpermissions.RxPermissions;
 import com.viewpagerindicator.TabPageIndicator;
@@ -45,6 +52,7 @@ import butterknife.ButterKnife;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 import rx.Observable;
+import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
@@ -75,6 +83,7 @@ public class MainActivity extends AppCompatActivity
     private MyLocationListener locationListener = new MyLocationListener();
     private SharedPreferences cityPreferences;
     private Bundle cityObject;
+    private Subscriber<AppVersionData> versionSubscriber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,12 +92,61 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
         Intent intent = getIntent();
         cityObject = intent.getBundleExtra("cityObject");
-        setSupportActionBar(toolbar);
         rxBusObservers();
-        cityPreferences = getSharedPreferences("myCitys", MODE_PRIVATE);
         getMyCitys();
+        initView();
         initLocation();
+        if (cityList.size() == 0) {
+            getPermission();
+        }
+        checkUpdate();
+    }
 
+    private void checkUpdate() {
+        versionSubscriber = new Subscriber<AppVersionData>() {
+            @Override
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onNext(AppVersionData appVersionData) {
+                if (appVersionData.getVersion().equals(getAppVersionName(getApplicationContext()))) {
+                    return;
+                }
+                else {
+                    AppUpdateDialog appUpdateDialog = new AppUpdateDialog();
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("data", appVersionData);
+                    appUpdateDialog.setArguments(bundle);
+                    appUpdateDialog.show(getSupportFragmentManager(), "appUpdateDialog");
+                }
+            }
+        };
+        HttpUpdate.getInstance().getUpdate(versionSubscriber);
+    }
+
+    public static String getAppVersionName(Context context) {
+        String versionName = "";
+        try {
+            // ---get the package info---
+            PackageManager pm = context.getPackageManager();
+            PackageInfo pi = pm.getPackageInfo(context.getPackageName(), 0);
+            versionName = pi.versionName;
+            if (versionName == null || versionName.length() == 0) return "";
+        } catch (Exception e) {
+
+        }
+        return versionName;
+    }
+
+    private void initView() {
+        setSupportActionBar(toolbar);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -105,9 +163,6 @@ public class MainActivity extends AppCompatActivity
 
         navView.setNavigationItemSelectedListener(this);
 
-        if (cityList.size() == 0) {
-            getPermission();
-        }
         adapter = new IndicatorAdapter(getSupportFragmentManager(), cityList);
         pager.setAdapter(adapter);
         indicator.setViewPager(pager);
@@ -169,6 +224,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void getMyCitys() {
+        cityPreferences = getSharedPreferences("myCitys", MODE_PRIVATE);
         int size = cityPreferences.getInt("size", 0);
         mCity = cityPreferences.getString("mCity", "");
         for (int i = 0; i < size; i++)
@@ -210,6 +266,10 @@ public class MainActivity extends AppCompatActivity
                             pager.setCurrentItem(0);
                             indicator.notifyDataSetChanged();
                         }
+                        else if (event instanceof FabEvent) {
+                            if (((FabEvent) event).getIsShow() == 1) fab.hide();
+                            else if (((FabEvent) event).getIsShow() == 0) fab.show();
+                        }
                     }
                 });
         addSubscription(subscription);
@@ -223,16 +283,12 @@ public class MainActivity extends AppCompatActivity
         this.mCompositeSubscription.add(subscription);
     }
 
-    public interface WeatherService {
-        @GET("weather")
-        Observable<WeatherData> getWeather(@Query("city") String city, @Query("key") String key);
-    }
-
     public class MyLocationListener implements BDLocationListener {
 
         @Override
         public void onReceiveLocation(BDLocation bdLocation) {
             if (bdLocation == null) {
+                Toast.makeText(getApplicationContext(),"无法定位到你的位置",Toast.LENGTH_SHORT).show();
                 return;
             } else {
                 mCity = bdLocation.getCity();

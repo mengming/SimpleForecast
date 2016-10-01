@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.phelps.simpleforecast.Adapter.RecyclerAdapter;
+import com.example.phelps.simpleforecast.Base.RxBus;
+import com.example.phelps.simpleforecast.Data.FabEvent;
 import com.example.phelps.simpleforecast.Data.WeatherData;
 import com.example.phelps.simpleforecast.Http.HttpMethods;
 import com.example.phelps.simpleforecast.R;
@@ -47,8 +49,21 @@ public class CityFragment extends Fragment {
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                swipeRefresh.setRefreshing(false);
+                swipeRefresh.setRefreshing(true);
                 HttpMethods.getInstance().getWeather(subscriber,cityName);
+            }
+        });
+        recycler.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+            }
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (RxBus.getInstance().hasObservers()) {
+                    RxBus.getInstance().post(new FabEvent(newState));
+                }
             }
         });
         recycler.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -64,20 +79,21 @@ public class CityFragment extends Fragment {
         subscriber = new Subscriber<WeatherData>() {
             @Override
             public void onCompleted() {
-
+                System.out.println("onCompleted");
             }
 
             @Override
             public void onError(Throwable e) {
-
+                System.out.println("onError");
             }
 
             @Override
             public void onNext(WeatherData weatherData) {
+                System.out.println("start");
                 weatherDataList.clear();
                 weatherDataList.addAll(weatherData.getHeWeatherDataService());
                 recyclerAdapter.notifyDataSetChanged();
-                swipeRefresh.setRefreshing(false);
+                System.out.println("finish");
             }
         };
         HttpMethods.getInstance().getWeather(subscriber, cityName);
