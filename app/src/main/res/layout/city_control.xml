@@ -5,6 +5,13 @@
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/city_control_list"/>
+
+    <Button
+        android:text="@string/sure"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_city_control_sure" />
+
 </LinearLayout>

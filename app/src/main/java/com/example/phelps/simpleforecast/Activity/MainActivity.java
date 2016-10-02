@@ -11,8 +11,8 @@ import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -28,21 +28,20 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
-import com.example.phelps.simpleforecast.Adapter.IndicatorAdapter;
+import com.example.phelps.simpleforecast.Adapter.TabPagerAdapter;
 import com.example.phelps.simpleforecast.Base.RxBus;
 import com.example.phelps.simpleforecast.Data.AppVersionData;
 import com.example.phelps.simpleforecast.Data.CityChangeOrderEvent;
-import com.example.phelps.simpleforecast.Data.CityEvent;
 import com.example.phelps.simpleforecast.Data.CityDeleteEvent;
+import com.example.phelps.simpleforecast.Data.CityEvent;
 import com.example.phelps.simpleforecast.Data.FabEvent;
-import com.example.phelps.simpleforecast.Data.WeatherData;
 import com.example.phelps.simpleforecast.Fragment.AppUpdateDialog;
 import com.example.phelps.simpleforecast.Fragment.CityControlDialog;
+import com.example.phelps.simpleforecast.Fragment.CityFragment;
 import com.example.phelps.simpleforecast.Fragment.NewCityDialog;
 import com.example.phelps.simpleforecast.Http.HttpUpdate;
 import com.example.phelps.simpleforecast.R;
 import com.tbruyelle.rxpermissions.RxPermissions;
-import com.viewpagerindicator.TabPageIndicator;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -51,9 +50,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit2.http.GET;
-import retrofit2.http.Query;
-import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action1;
@@ -62,8 +58,6 @@ import rx.subscriptions.CompositeSubscription;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    @BindView(R.id.indicator)
-    TabPageIndicator indicator;
     @BindView(R.id.pager)
     ViewPager pager;
     @BindView(R.id.toolbar)
@@ -76,16 +70,20 @@ public class MainActivity extends AppCompatActivity
     DrawerLayout drawerLayout;
     @BindView(R.id.app_bar_layout)
     AppBarLayout appBarLayout;
+    @BindView(R.id.tab_layout)
+    TabLayout tabLayout;
 
+    private List<Fragment> fragmentList = new ArrayList<>();
     private List<String> cityList = new ArrayList<>();
+    private List<Boolean> updateList = new ArrayList<>();
     private LocationClient locationClient;
     private CompositeSubscription mCompositeSubscription;
-    private IndicatorAdapter adapter;
     private String mCity;
     private MyLocationListener locationListener = new MyLocationListener();
     private SharedPreferences cityPreferences;
     private Bundle cityObject;
     private Subscriber<AppVersionData> versionSubscriber;
+    private TabPagerAdapter tabPagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,12 +94,20 @@ public class MainActivity extends AppCompatActivity
         cityObject = intent.getBundleExtra("cityObject");
         rxBusObservers();
         getMyCitys();
-        initView();
         initLocation();
         if (cityList.size() == 0) {
             getPermission();
         }
+        initView();
         checkUpdate();
+    }
+
+    private Fragment newFragment(String cityName){
+        Bundle bundle = new Bundle();
+        bundle.putString("city",cityName);
+        CityFragment fragment = new CityFragment();
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     private void checkUpdate() {
@@ -119,9 +125,8 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onNext(AppVersionData appVersionData) {
                 if (appVersionData.getVersion().equals(getAppVersionName(getApplicationContext()))) {
-                    Toast.makeText(getApplicationContext(),"已是最新版本了",Toast.LENGTH_SHORT).show();
-                }
-                else {
+                    Toast.makeText(getApplicationContext(), "已是最新版本了", Toast.LENGTH_SHORT).show();
+                } else {
                     AppUpdateDialog appUpdateDialog = new AppUpdateDialog();
                     Bundle bundle = new Bundle();
                     bundle.putSerializable("data", appVersionData);
@@ -165,9 +170,15 @@ public class MainActivity extends AppCompatActivity
 
         navView.setNavigationItemSelectedListener(this);
 
-        adapter = new IndicatorAdapter(getSupportFragmentManager(), cityList);
-        pager.setAdapter(adapter);
-        indicator.setViewPager(pager);
+        for (int i=0;i<cityList.size();i++) {
+            cityList.add(cityList.get(i));
+            fragmentList.add(newFragment(cityList.get(i)));
+            updateList.add(false);
+        }
+        tabPagerAdapter = new TabPagerAdapter(getSupportFragmentManager(),cityList,fragmentList,updateList);
+        pager.setAdapter(tabPagerAdapter);
+        tabLayout.setupWithViewPager(pager);
+        tabLayout.setTabMode(TabLayout.MODE_FIXED);
     }
 
     @Override
@@ -246,28 +257,33 @@ public class MainActivity extends AppCompatActivity
                                 while (!cityList.get(i).equals(strCity)) i++;
                                 pager.setCurrentItem(i);
                             } else {
+                                Fragment fragment = newFragment(strCity);
                                 cityList.add(strCity);
-                                adapter.notifyDataSetChanged();
+                                fragmentList.add(fragment);
+                                updateList.add(false);
+                                tabPagerAdapter.notifyDataSetChanged();
                                 pager.setCurrentItem(cityList.size() - 1);
-                                indicator.notifyDataSetChanged();
                             }
-                        }
-                        else if (event instanceof CityDeleteEvent) {
-                            cityList.remove(((CityDeleteEvent) event).getIndex());
-                            adapter.notifyDataSetChanged();
+                        } else if (event instanceof CityDeleteEvent) {
+                            int index = ((CityDeleteEvent) event).getIndex();
+                            cityList.remove(index);
+                            fragmentList.remove(index);
+                            tabPagerAdapter.notifyDataSetChanged();
                             pager.setCurrentItem(0);
-                            indicator.notifyDataSetChanged();
-                        }
-                        else if (event instanceof CityChangeOrderEvent) {
-                            int start = ((CityChangeOrderEvent) event).getStart();
-//                            fragment1 = fragmentManager.findFragmentByTag("android:switcher:" + R.id.pager + ":" + start);
-                            if (((CityChangeOrderEvent) event).getChangeOrder()) Collections.swap(cityList,start,start-1);
-                            else Collections.swap(cityList,start,start+1);
-                            adapter.notifyDataSetChanged();
-                            pager.setCurrentItem(start);
-                            indicator.notifyDataSetChanged();
-                        }
-                        else if (event instanceof FabEvent) {
+                        } else if (event instanceof CityChangeOrderEvent) {
+                            List<String> list = ((CityChangeOrderEvent) event).getCityList();
+                            for (int i=0;i<list.size();i++)
+                                if (!list.get(i).equals(cityList.get(i)))
+                                    updateList.set(i,true);
+                            tabPagerAdapter.setUpdateFlags(updateList);
+                            for (int i=0;i<list.size();i++)
+                                if (updateList.get(i)) {
+                                    tabPagerAdapter.setNewFragment(newFragment(list.get(i)));
+                                    tabPagerAdapter.instantiateItem(pager,i);
+                                }
+                            tabPagerAdapter.notifyDataSetChanged();
+                            pager.setCurrentItem(0);
+                        } else if (event instanceof FabEvent) {
                             if (((FabEvent) event).getIsShow() == 1) fab.hide();
                             else if (((FabEvent) event).getIsShow() == 0) fab.show();
                         }
@@ -289,7 +305,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onReceiveLocation(BDLocation bdLocation) {
             if (bdLocation == null) {
-                Toast.makeText(getApplicationContext(),"无法定位到你的位置",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "无法定位到你的位置", Toast.LENGTH_SHORT).show();
                 return;
             } else {
                 mCity = bdLocation.getCity();
@@ -341,7 +357,7 @@ public class MainActivity extends AppCompatActivity
         Bundle bundle = new Bundle();
         bundle.putSerializable("cityList", (Serializable) cityList);
         cityControlDialog.setArguments(bundle);
-        cityControlDialog.show(getFragmentManager(),"cityControl");
+        cityControlDialog.show(getFragmentManager(), "cityControl");
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
