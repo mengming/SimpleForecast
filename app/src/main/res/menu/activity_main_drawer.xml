@@ -11,6 +11,9 @@
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"
                 android:title="反馈信息" />
+            <item
+                android:id="@+id/nav_update"
+                android:title="检查更新" />
         </menu>
     </item>
 

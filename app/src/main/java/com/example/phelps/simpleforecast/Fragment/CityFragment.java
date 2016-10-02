@@ -49,7 +49,7 @@ public class CityFragment extends Fragment {
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                swipeRefresh.setRefreshing(true);
+                swipeRefresh.setRefreshing(false);
                 HttpMethods.getInstance().getWeather(subscriber,cityName);
             }
         });

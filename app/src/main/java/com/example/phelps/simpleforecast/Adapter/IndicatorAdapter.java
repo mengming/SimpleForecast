@@ -16,10 +16,12 @@ import java.util.List;
 public class IndicatorAdapter extends FragmentPagerAdapter implements IconPagerAdapter{
     private List<String> cityList;
     private int mCount;
+    public FragmentManager fragmentManager;
 
     public IndicatorAdapter(FragmentManager fm,List<String> cityList) {
         super(fm);
         this.cityList = cityList;
+        fragmentManager = fm;
         mCount = cityList.size();
     }
 
@@ -30,6 +32,10 @@ public class IndicatorAdapter extends FragmentPagerAdapter implements IconPagerA
         bundle.putString("city",cityList.get(position));
         fragment.setArguments(bundle);
         return fragment;
+    }
+
+    public FragmentManager getFragmentManager() {
+        return fragmentManager;
     }
 
     @Override

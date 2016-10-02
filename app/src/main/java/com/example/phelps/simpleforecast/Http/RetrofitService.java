@@ -22,5 +22,5 @@ public interface RetrofitService {
     Observable<AppVersionData> getUpdate();
     @Streaming
     @GET
-    Call<ResponseBody> downloadApk(@Url String url);
+    Observable<ResponseBody> downloadApk(@Url String url);
 }

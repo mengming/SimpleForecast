@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -117,7 +119,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onNext(AppVersionData appVersionData) {
                 if (appVersionData.getVersion().equals(getAppVersionName(getApplicationContext()))) {
-                    return;
+                    Toast.makeText(getApplicationContext(),"已是最新版本了",Toast.LENGTH_SHORT).show();
                 }
                 else {
                     AppUpdateDialog appUpdateDialog = new AppUpdateDialog();
@@ -258,12 +260,11 @@ public class MainActivity extends AppCompatActivity
                         }
                         else if (event instanceof CityChangeOrderEvent) {
                             int start = ((CityChangeOrderEvent) event).getStart();
-                            if (((CityChangeOrderEvent) event).getChangeOrder()) {
-                                Collections.swap(cityList,start,start-1);
-                            }
+//                            fragment1 = fragmentManager.findFragmentByTag("android:switcher:" + R.id.pager + ":" + start);
+                            if (((CityChangeOrderEvent) event).getChangeOrder()) Collections.swap(cityList,start,start-1);
                             else Collections.swap(cityList,start,start+1);
                             adapter.notifyDataSetChanged();
-                            pager.setCurrentItem(0);
+                            pager.setCurrentItem(start);
                             indicator.notifyDataSetChanged();
                         }
                         else if (event instanceof FabEvent) {
@@ -353,6 +354,8 @@ public class MainActivity extends AppCompatActivity
             getPermission();
         } else if (id == R.id.nav_send) {
             Toast.makeText(getApplicationContext(), "反馈信息", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_update) {
+            checkUpdate();
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

@@ -10,6 +10,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.phelps.simpleforecast.Base.RxBus;
 import com.example.phelps.simpleforecast.Data.CityChangeOrderEvent;
@@ -75,13 +76,13 @@ public class CityControlDialog extends DialogFragment {
                 convertView.setTag(viewHolder);
             }
             else viewHolder = (ViewHolder) convertView.getTag();
-            if (position == 0) viewHolder.btnCityUp.setEnabled(false);
-            if (position == cityList.size()) viewHolder.btnCityDown.setEnabled(false);
             viewHolder.cityText.setText(cityList.get(position).toString());
             viewHolder.btnDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (RxBus.getInstance().hasObservers()) {
+                    if (position == 0 && cityList.size() == 1)
+                        Toast.makeText(getActivity().getApplicationContext(),"不能再删除了哦",Toast.LENGTH_SHORT).show();
+                    else if (RxBus.getInstance().hasObservers()) {
                         RxBus.getInstance().post(new CityDeleteEvent(position));
                         adapter.notifyDataSetChanged();
                     }
@@ -90,7 +91,9 @@ public class CityControlDialog extends DialogFragment {
             viewHolder.btnCityUp.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (RxBus.getInstance().hasObservers()) {
+                    if (position == 0)
+                        Toast.makeText(getActivity().getApplicationContext(),"已经是第一个了",Toast.LENGTH_SHORT).show();
+                    else if (RxBus.getInstance().hasObservers()) {
                         RxBus.getInstance().post(new CityChangeOrderEvent(position,position-1));
                         adapter.notifyDataSetChanged();
                     }
@@ -99,7 +102,9 @@ public class CityControlDialog extends DialogFragment {
             viewHolder.btnCityDown.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (RxBus.getInstance().hasObservers()) {
+                    if (position == cityList.size()-1)
+                        Toast.makeText(getActivity().getApplicationContext(),"已经是最后一个了",Toast.LENGTH_SHORT).show();
+                    else if (RxBus.getInstance().hasObservers()) {
                         RxBus.getInstance().post(new CityChangeOrderEvent(position,position+1));
                         adapter.notifyDataSetChanged();
                     }

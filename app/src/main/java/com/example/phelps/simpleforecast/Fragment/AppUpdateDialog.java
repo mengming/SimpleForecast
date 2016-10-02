@@ -1,5 +1,7 @@
 package com.example.phelps.simpleforecast.Fragment;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -10,15 +12,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.phelps.simpleforecast.Data.AppVersionData;
-import com.example.phelps.simpleforecast.Http.DownloadApk;
-import com.example.phelps.simpleforecast.Http.RetrofitService;
+import com.example.phelps.simpleforecast.Http.HttpUpdate;
 import com.example.phelps.simpleforecast.R;
+
+import java.io.File;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import okhttp3.ResponseBody;
-import retrofit2.Response;
 import rx.Subscriber;
 
 /**
@@ -48,6 +50,7 @@ public class AppUpdateDialog extends DialogFragment {
             tvUpdateAppName.setText(appVersionData.getName());
             tvUpdateChangeLog.setText(appVersionData.getChange_log());
         }
+        this.setCancelable(false);
         return view;
     }
 
@@ -57,16 +60,16 @@ public class AppUpdateDialog extends DialogFragment {
             case R.id.btn_update_sure:
                 download(appVersionData.getInstall_url());
                 break;
-            case R.id.btn_update_cancel:
+            case R.id.btn_update_cancel: getDialog().dismiss();
                 break;
         }
     }
 
     private void download(String url) {
-        Subscriber subscriber = new Subscriber() {
+        Subscriber<File> subscriber = new Subscriber<File>() {
             @Override
             public void onCompleted() {
-
+                System.out.println("finish");
             }
 
             @Override
@@ -75,11 +78,20 @@ public class AppUpdateDialog extends DialogFragment {
             }
 
             @Override
-            public void onNext(Object o) {
-                System.out.println("success");
+            public void onNext(File file) {
+                if (file == null) System.out.println("null");
+                else {
+                    System.out.println("onNext");
+                    Intent intent = new Intent();
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.setAction(android.content.Intent.ACTION_VIEW);
+                    intent.setDataAndType(Uri.fromFile(file),
+                            "application/vnd.android.package-archive");
+                    startActivity(intent);
+                }
             }
         };
-        DownloadApk.getInstance(url).getApk(url,subscriber);
+        HttpUpdate.getInstance().getApk(url,subscriber);
     }
 
 }
