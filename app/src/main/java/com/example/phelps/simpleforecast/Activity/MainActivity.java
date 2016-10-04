@@ -29,7 +29,9 @@ import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.example.phelps.simpleforecast.Adapter.TabPagerAdapter;
+import com.example.phelps.simpleforecast.Base.GetVersionName;
 import com.example.phelps.simpleforecast.Base.RxBus;
+import com.example.phelps.simpleforecast.Base.SharedPreferencesHelper;
 import com.example.phelps.simpleforecast.Data.AppVersionData;
 import com.example.phelps.simpleforecast.Data.CityChangeOrderEvent;
 import com.example.phelps.simpleforecast.Data.CityDeleteEvent;
@@ -45,7 +47,6 @@ import com.tbruyelle.rxpermissions.RxPermissions;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -80,7 +81,6 @@ public class MainActivity extends AppCompatActivity
     private CompositeSubscription mCompositeSubscription;
     private String mCity;
     private MyLocationListener locationListener = new MyLocationListener();
-    private SharedPreferences cityPreferences;
     private Bundle cityObject;
     private Subscriber<AppVersionData> versionSubscriber;
     private TabPagerAdapter tabPagerAdapter;
@@ -93,7 +93,14 @@ public class MainActivity extends AppCompatActivity
         Intent intent = getIntent();
         cityObject = intent.getBundleExtra("cityObject");
         rxBusObservers();
-        getMyCitys();
+        SharedPreferencesHelper instance = SharedPreferencesHelper.getInstance(getApplicationContext());
+        cityList = new ArrayList<>();
+        cityList.add("广州");
+        int size = instance.getInt("size");
+        for (int i=0; i<size; i++) {
+            String city = instance.getString("city"+i);
+//            cityList.add(city);
+        }
         initLocation();
         if (cityList.size() == 0) {
             getPermission();
@@ -114,17 +121,18 @@ public class MainActivity extends AppCompatActivity
         versionSubscriber = new Subscriber<AppVersionData>() {
             @Override
             public void onCompleted() {
-
+                System.out.println("onCompleted");
             }
 
             @Override
             public void onError(Throwable e) {
-
+                System.out.println(e.getMessage());
             }
 
             @Override
             public void onNext(AppVersionData appVersionData) {
-                if (appVersionData.getVersion().equals(getAppVersionName(getApplicationContext()))) {
+                System.out.println("onNext");
+                if (appVersionData.getVersion().equals(new GetVersionName(getApplicationContext()).versionName )) {
                     Toast.makeText(getApplicationContext(), "已是最新版本了", Toast.LENGTH_SHORT).show();
                 } else {
                     AppUpdateDialog appUpdateDialog = new AppUpdateDialog();
@@ -136,20 +144,6 @@ public class MainActivity extends AppCompatActivity
             }
         };
         HttpUpdate.getInstance().getUpdate(versionSubscriber);
-    }
-
-    public static String getAppVersionName(Context context) {
-        String versionName = "";
-        try {
-            // ---get the package info---
-            PackageManager pm = context.getPackageManager();
-            PackageInfo pi = pm.getPackageInfo(context.getPackageName(), 0);
-            versionName = pi.versionName;
-            if (versionName == null || versionName.length() == 0) return "";
-        } catch (Exception e) {
-
-        }
-        return versionName;
     }
 
     private void initView() {
@@ -178,13 +172,12 @@ public class MainActivity extends AppCompatActivity
         tabPagerAdapter = new TabPagerAdapter(getSupportFragmentManager(),cityList,fragmentList,updateList);
         pager.setAdapter(tabPagerAdapter);
         tabLayout.setupWithViewPager(pager);
-        tabLayout.setTabMode(TabLayout.MODE_FIXED);
     }
 
     @Override
-    protected void onDestroy() {
-        saveMyCity(mCity);
-        super.onDestroy();
+    protected void onStop() {
+        saveMyCity();
+        super.onStop();
     }
 
     private boolean isCityCreated(String city) {
@@ -224,24 +217,11 @@ public class MainActivity extends AppCompatActivity
         locationClient.registerLocationListener(locationListener);
     }
 
-    private void saveMyCity(String mCity) {
-        SharedPreferences.Editor editor = cityPreferences.edit();
-        editor.clear();
-        for (int i = 0; i < cityList.size(); i++) {
-            editor.putString("city" + i, cityList.get(i));
-        }
-        editor.remove("size");
-        editor.putInt("size", cityList.size());
-        editor.putString("mCity", mCity);
-        editor.commit();
-    }
-
-    private void getMyCitys() {
-        cityPreferences = getSharedPreferences("myCitys", MODE_PRIVATE);
-        int size = cityPreferences.getInt("size", 0);
-        mCity = cityPreferences.getString("mCity", "");
-        for (int i = 0; i < size; i++)
-            cityList.add(cityPreferences.getString("city" + i, ""));
+    private void saveMyCity() {
+        SharedPreferencesHelper instance = SharedPreferencesHelper.getInstance(getApplicationContext());
+        instance.clear();
+        for (int i=0; i<cityList.size(); i++) instance.putString("city"+i,cityList.get(i));
+        instance.putInt("size", cityList.size());
     }
 
     private void rxBusObservers() {
@@ -306,7 +286,6 @@ public class MainActivity extends AppCompatActivity
         public void onReceiveLocation(BDLocation bdLocation) {
             if (bdLocation == null) {
                 Toast.makeText(getApplicationContext(), "无法定位到你的位置", Toast.LENGTH_SHORT).show();
-                return;
             } else {
                 mCity = bdLocation.getCity();
                 int index = mCity.indexOf("市");
@@ -323,7 +302,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
@@ -371,11 +350,18 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_send) {
             Toast.makeText(getApplicationContext(), "反馈信息", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.nav_update) {
-            checkUpdate();
+            HttpUpdate.getInstance().getUpdate(versionSubscriber);
+        } else if (id == R.id.nav_about) {
+            showAbout();
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        if (drawer != null) drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void showAbout() {
+        Intent intent = new Intent(MainActivity.this,AboutActivity.class);
+        startActivity(intent);
     }
 
 }

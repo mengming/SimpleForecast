@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.phelps.simpleforecast.Base.GetVersionName;
 import com.example.phelps.simpleforecast.Data.AppVersionData;
 import com.example.phelps.simpleforecast.Http.HttpUpdate;
 import com.example.phelps.simpleforecast.R;
@@ -91,7 +92,7 @@ public class AppUpdateDialog extends DialogFragment {
                 }
             }
         };
-        HttpUpdate.getInstance().getApk(url,subscriber);
+        HttpUpdate.getInstance().getApk(url,subscriber,appVersionData.getName(), new GetVersionName(getContext()).versionName);
     }
 
 }

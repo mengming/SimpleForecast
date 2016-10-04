@@ -2,6 +2,7 @@ package com.example.phelps.simpleforecast.Http;
 
 import android.os.Environment;
 
+import com.example.phelps.simpleforecast.Base.GetVersionName;
 import com.example.phelps.simpleforecast.Data.AppVersionData;
 
 import java.io.File;
@@ -58,20 +59,18 @@ public class HttpUpdate {
         return INSTANCE;
     }
 
-    public void getApk(String url,Subscriber<File> subscriber){
-        System.out.println("get");
+    public void getApk(String url,Subscriber<File> subscriber,String apkName,String version){
         retrofitService.downloadApk(url)
                 .map(new Func1<ResponseBody, File>() {
                     @Override
                     public File call(ResponseBody responseBody) {
-                        System.out.println("call");
                         FileOutputStream outputStream = null;
                         try {
                             byte[] bytes = responseBody.bytes();
-                            File file = new File(Environment.getExternalStorageDirectory().getPath() + File.separator + "app-release.apk");
+                            File file = new File(Environment.getExternalStorageDirectory().getPath()+"/"+apkName+"-"+version+".apk");
+                            if (file.exists()) file.delete();
                             outputStream = new FileOutputStream(file);
                             outputStream.write(bytes);
-                            System.out.println("file");
                             return file;
                         } catch (IOException e) {
                             e.printStackTrace();

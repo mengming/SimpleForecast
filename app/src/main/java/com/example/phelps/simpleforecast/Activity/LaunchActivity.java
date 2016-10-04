@@ -2,14 +2,12 @@ package com.example.phelps.simpleforecast.Activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-
 import com.example.phelps.simpleforecast.Base.JsonReader;
+import com.example.phelps.simpleforecast.Base.SharedPreferencesHelper;
 import com.example.phelps.simpleforecast.Data.CityData;
 import com.example.phelps.simpleforecast.Data.CityObject;
 import com.example.phelps.simpleforecast.R;
@@ -42,6 +40,7 @@ public class LaunchActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         int flag = WindowManager.LayoutParams.FLAG_FULLSCREEN;
         Window window = LaunchActivity.this.getWindow();
         window.setFlags(flag,flag);
@@ -110,8 +109,7 @@ public class LaunchActivity extends Activity {
                     break;
                 }
             }
-            if (isProvince) continue;
-            else list.add(cityData.getProv());
+            if (!isProvince) list.add(cityData.getProv());
         }
         return list;
     }
@@ -131,4 +129,6 @@ public class LaunchActivity extends Activity {
         return map;
     }
 
+    private void getMyCitys() {
+    }
 }

@@ -7,8 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,8 +32,6 @@ import butterknife.OnClick;
 public class CityControlDialog extends DialogFragment {
     @BindView(R.id.city_control_list)
     ListView cityControlList;
-    @BindView(R.id.btn_city_control_sure)
-    Button btnCityControlSure;
 
     private ArrayList cityList;
     private CityAdapter adapter;
@@ -51,11 +49,18 @@ public class CityControlDialog extends DialogFragment {
         return view;
     }
 
-    @OnClick(R.id.btn_city_control_sure)
-    public void onClick() {
-        if (RxBus.getInstance().hasObservers()) {
-            RxBus.getInstance().post(new CityChangeOrderEvent(cityList));
-            dismiss();
+    @OnClick({R.id.btn_city_control_sure, R.id.btn_city_control_cancel})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_city_control_sure:
+                if (RxBus.getInstance().hasObservers()) {
+                    RxBus.getInstance().post(new CityChangeOrderEvent(cityList));
+                    dismiss();
+                }
+                break;
+            case R.id.btn_city_control_cancel:
+                dismiss();
+                break;
         }
     }
 

@@ -4,16 +4,21 @@
         android:id="@+id/nav_location"
         android:icon="@drawable/icon_location"
         android:title="我的位置" />
+    <item
+        android:id="@+id/nav_update"
+        android:icon="@android:drawable/stat_sys_download"
+        android:title="检查更新" />
 
-    <item android:title="Communicate">
+    <item android:title="About">
         <menu>
             <item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"
                 android:title="反馈信息" />
             <item
-                android:id="@+id/nav_update"
-                android:title="检查更新" />
+                android:id="@+id/nav_about"
+                android:icon="@android:drawable/ic_menu_info_details"
+                android:title="关于SimpleForecast"/>
         </menu>
     </item>
 

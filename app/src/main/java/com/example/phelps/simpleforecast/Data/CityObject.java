@@ -11,7 +11,7 @@ public class CityObject {
     public HashMap<String, List<String>> cityMap;
     public List<String> provinceList;
 
-    public CityObject(HashMap<String, List<String>> cityMap,List<String> provinceList){
+    public CityObject(HashMap<String, List<String>> cityMap, List<String> provinceList){
         this.cityMap = cityMap;
         this.provinceList = provinceList;
     }
