@@ -1,10 +1,13 @@
 package com.example.phelps.simpleforecast.Adapter;
 
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.view.ViewGroup;
+
+import com.example.phelps.simpleforecast.Fragment.CityFragment;
 
 import java.util.List;
 
@@ -15,7 +18,6 @@ import java.util.List;
 public class TabPagerAdapter extends FragmentPagerAdapter {
 
     private List<String> cityList;
-    private List<Fragment> fragmentList;
     private List<Boolean> updateFlags;
     private FragmentManager fm;
     private Fragment newFragment;
@@ -28,17 +30,20 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
         this.updateFlags = updateFlags;
     }
 
-    public TabPagerAdapter(FragmentManager fm, List<String> cityList, List<Fragment> fragmentList, List<Boolean> updateFlags) {
+    public TabPagerAdapter(FragmentManager fm, List<String> cityList, List<Boolean> updateFlags) {
         super(fm);
         this.fm = fm;
         this.cityList = cityList;
-        this.fragmentList = fragmentList;
         this.updateFlags = updateFlags;
     }
 
     @Override
     public Fragment getItem(int position) {
-        return fragmentList.get(position);
+        Bundle bundle = new Bundle();
+        bundle.putString("city",cityList.get(position));
+        CityFragment fragment = new CityFragment();
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     @Override

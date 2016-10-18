@@ -17,7 +17,7 @@ import rx.schedulers.Schedulers;
  * Created by Phelps on 2016/8/17.
  */
 public class HttpMethods {
-    public static final String BASE_URL = "https://api.heweather.com/x3/";
+    private static final String BASE_URL = "https://api.heweather.com/x3/";
     private static String heFengKey = "00f40c947c99410b982f03996c7d1a7c";
 
     private static final int DEFAULT_TIMEOUT = 5;
@@ -25,9 +25,7 @@ public class HttpMethods {
     private Retrofit retrofit;
     private RetrofitService retrofitService;
 
-    private volatile static HttpMethods INSTANCE;
-
-    private HttpMethods() {
+    public HttpMethods() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
@@ -41,20 +39,9 @@ public class HttpMethods {
         retrofitService = retrofit.create(RetrofitService.class);
     }
 
-    //获取单例
-    public static HttpMethods getInstance(){
-        if (INSTANCE == null) {
-            synchronized (HttpMethods.class){
-                INSTANCE = new HttpMethods();
-            }
-        }
-        return INSTANCE;
-    }
-
     public void getWeather(Subscriber<WeatherData> subscriber,String cityName){
         retrofitService.getWeather(cityName,heFengKey)
                 .subscribeOn(Schedulers.io())
-                .unsubscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(subscriber);
     }

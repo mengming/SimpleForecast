@@ -1,11 +1,7 @@
 package com.example.phelps.simpleforecast.Activity;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
@@ -74,7 +70,6 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.tab_layout)
     TabLayout tabLayout;
 
-    private List<Fragment> fragmentList = new ArrayList<>();
     private List<String> cityList = new ArrayList<>();
     private List<Boolean> updateList = new ArrayList<>();
     private LocationClient locationClient;
@@ -84,6 +79,7 @@ public class MainActivity extends AppCompatActivity
     private Bundle cityObject;
     private Subscriber<AppVersionData> versionSubscriber;
     private TabPagerAdapter tabPagerAdapter;
+    private HttpUpdate httpUpdate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,14 +89,13 @@ public class MainActivity extends AppCompatActivity
         Intent intent = getIntent();
         cityObject = intent.getBundleExtra("cityObject");
         rxBusObservers();
-        SharedPreferencesHelper instance = SharedPreferencesHelper.getInstance(getApplicationContext());
-        cityList = new ArrayList<>();
-        cityList.add("广州");
+        SharedPreferencesHelper instance = new SharedPreferencesHelper(getApplicationContext());
         int size = instance.getInt("size");
         for (int i=0; i<size; i++) {
             String city = instance.getString("city"+i);
-//            cityList.add(city);
+            cityList.add(city);
         }
+        instance = null;
         initLocation();
         if (cityList.size() == 0) {
             getPermission();
@@ -132,7 +127,10 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onNext(AppVersionData appVersionData) {
                 System.out.println("onNext");
-                if (appVersionData.getVersion().equals(new GetVersionName(getApplicationContext()).versionName )) {
+                GetVersionName getVersionName = new GetVersionName(getApplicationContext());
+                String version = getVersionName.versionName;
+                getVersionName = null;
+                if (appVersionData.getVersion().equals(version)) {
                     Toast.makeText(getApplicationContext(), "已是最新版本了", Toast.LENGTH_SHORT).show();
                 } else {
                     AppUpdateDialog appUpdateDialog = new AppUpdateDialog();
@@ -143,7 +141,8 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         };
-        HttpUpdate.getInstance().getUpdate(versionSubscriber);
+        httpUpdate = new HttpUpdate();
+        httpUpdate.getUpdate(versionSubscriber);
     }
 
     private void initView() {
@@ -164,12 +163,8 @@ public class MainActivity extends AppCompatActivity
 
         navView.setNavigationItemSelectedListener(this);
 
-        for (int i=0;i<cityList.size();i++) {
-            cityList.add(cityList.get(i));
-            fragmentList.add(newFragment(cityList.get(i)));
-            updateList.add(false);
-        }
-        tabPagerAdapter = new TabPagerAdapter(getSupportFragmentManager(),cityList,fragmentList,updateList);
+        for (int i=0;i<cityList.size();i++) updateList.add(false);
+        tabPagerAdapter = new TabPagerAdapter(getSupportFragmentManager(),cityList,updateList);
         pager.setAdapter(tabPagerAdapter);
         tabLayout.setupWithViewPager(pager);
     }
@@ -218,10 +213,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void saveMyCity() {
-        SharedPreferencesHelper instance = SharedPreferencesHelper.getInstance(getApplicationContext());
+        SharedPreferencesHelper instance = new SharedPreferencesHelper(getApplicationContext());
         instance.clear();
         for (int i=0; i<cityList.size(); i++) instance.putString("city"+i,cityList.get(i));
         instance.putInt("size", cityList.size());
+        instance = null;
     }
 
     private void rxBusObservers() {
@@ -237,9 +233,7 @@ public class MainActivity extends AppCompatActivity
                                 while (!cityList.get(i).equals(strCity)) i++;
                                 pager.setCurrentItem(i);
                             } else {
-                                Fragment fragment = newFragment(strCity);
                                 cityList.add(strCity);
-                                fragmentList.add(fragment);
                                 updateList.add(false);
                                 tabPagerAdapter.notifyDataSetChanged();
                                 pager.setCurrentItem(cityList.size() - 1);
@@ -247,17 +241,24 @@ public class MainActivity extends AppCompatActivity
                         } else if (event instanceof CityDeleteEvent) {
                             int index = ((CityDeleteEvent) event).getIndex();
                             cityList.remove(index);
-                            fragmentList.remove(index);
                             tabPagerAdapter.notifyDataSetChanged();
                             pager.setCurrentItem(0);
                         } else if (event instanceof CityChangeOrderEvent) {
-                            List<String> list = ((CityChangeOrderEvent) event).getCityList();
-                            for (int i=0;i<list.size();i++)
-                                if (!list.get(i).equals(cityList.get(i)))
-                                    updateList.set(i,true);
+                            ArrayList<String> list = ((CityChangeOrderEvent) event).getCityList();
+                            for (int i=0;i<list.size();i++) {
+                                System.out.println(list.get(i)+"   "+cityList.get(i));
+                                if (!list.get(i).equals(cityList.get(i))) {
+                                    updateList.set(i, true);
+                                    System.out.println("different");
+                                }
+                            }
+                            cityList.clear();
+                            cityList.addAll(list);
                             tabPagerAdapter.setUpdateFlags(updateList);
                             for (int i=0;i<list.size();i++)
                                 if (updateList.get(i)) {
+                                    System.out.println(i+"instantiate");
+                                    System.out.println(list.get(i));
                                     tabPagerAdapter.setNewFragment(newFragment(list.get(i)));
                                     tabPagerAdapter.instantiateItem(pager,i);
                                 }
@@ -350,7 +351,8 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_send) {
             Toast.makeText(getApplicationContext(), "反馈信息", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.nav_update) {
-            HttpUpdate.getInstance().getUpdate(versionSubscriber);
+            httpUpdate.getUpdate(versionSubscriber);
+            System.out.println("update");
         } else if (id == R.id.nav_about) {
             showAbout();
         }

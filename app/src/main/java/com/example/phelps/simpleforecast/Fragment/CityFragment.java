@@ -50,7 +50,9 @@ public class CityFragment extends Fragment {
             @Override
             public void onRefresh() {
                 swipeRefresh.setRefreshing(false);
-                HttpMethods.getInstance().getWeather(subscriber,cityName);
+                HttpMethods httpMethods = new HttpMethods();
+                httpMethods.getWeather(subscriber,cityName);
+                httpMethods = null;
             }
         });
         recycler.setOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -93,10 +95,13 @@ public class CityFragment extends Fragment {
                 weatherDataList.clear();
                 weatherDataList.addAll(weatherData.getHeWeatherDataService());
                 recyclerAdapter.notifyDataSetChanged();
+                swipeRefresh.setRefreshing(false);
                 System.out.println("finish");
             }
         };
-        HttpMethods.getInstance().getWeather(subscriber, cityName);
+        HttpMethods httpMethods = new HttpMethods();
+        httpMethods.getWeather(subscriber,cityName);
+        httpMethods = null;
     }
 
 }

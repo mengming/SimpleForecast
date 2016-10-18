@@ -92,7 +92,8 @@ public class AppUpdateDialog extends DialogFragment {
                 }
             }
         };
-        HttpUpdate.getInstance().getApk(url,subscriber,appVersionData.getName(), new GetVersionName(getContext()).versionName);
+        HttpUpdate httpUpdate = new HttpUpdate();
+        httpUpdate.getApk(url,subscriber,appVersionData.getName(), new GetVersionName(getContext()).versionName);
     }
 
 }

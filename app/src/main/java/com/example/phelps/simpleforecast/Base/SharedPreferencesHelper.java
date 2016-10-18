@@ -10,21 +10,10 @@ import android.content.SharedPreferences;
 public class SharedPreferencesHelper {
 
     private static final String PERF_NAME = "myCitys";
-    private volatile static SharedPreferencesHelper instance;
     private final SharedPreferences preferences;
 
-    private SharedPreferencesHelper(Context context) {
+    public SharedPreferencesHelper(Context context) {
         preferences = context.getSharedPreferences(PERF_NAME, Context.MODE_PRIVATE);
-    }
-
-    public static SharedPreferencesHelper getInstance(Context context) {
-        if (instance == null) {
-            synchronized (SharedPreferencesHelper.class) {
-                if (instance == null)
-                    instance = new SharedPreferencesHelper(context);
-            }
-        }
-        return instance;
     }
 
     public final void putString(String key, String value) {

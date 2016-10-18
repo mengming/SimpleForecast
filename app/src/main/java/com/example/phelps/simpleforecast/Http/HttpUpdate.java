@@ -29,13 +29,11 @@ import rx.schedulers.Schedulers;
 public class HttpUpdate {
 
     private Retrofit retrofit;
-    public static final String APK_URL = "http://119.29.186.49:8000/v1/";
+    private static final String APK_URL = "http://119.29.186.49:8000/v1/";
     private RetrofitService retrofitService;
     private static final int DEFAULT_TIMEOUT = 5;
 
-    private volatile static HttpUpdate INSTANCE;
-
-    private HttpUpdate(){
+    public HttpUpdate(){
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
@@ -47,16 +45,6 @@ public class HttpUpdate {
                 .build();
 
         retrofitService = retrofit.create(RetrofitService.class);
-    }
-
-    //获取单例
-    public static HttpUpdate getInstance(){
-        if (INSTANCE == null) {
-            synchronized (HttpUpdate.class){
-                INSTANCE = new HttpUpdate();
-            }
-        }
-        return INSTANCE;
     }
 
     public void getApk(String url,Subscriber<File> subscriber,String apkName,String version){
@@ -96,7 +84,6 @@ public class HttpUpdate {
     public void getUpdate(Subscriber<AppVersionData> subscriber){
         retrofitService.getUpdate()
                 .subscribeOn(Schedulers.io())
-                .unsubscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(subscriber);
     }

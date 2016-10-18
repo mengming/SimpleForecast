@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
 import com.example.phelps.simpleforecast.Base.JsonReader;
-import com.example.phelps.simpleforecast.Base.SharedPreferencesHelper;
 import com.example.phelps.simpleforecast.Data.CityData;
 import com.example.phelps.simpleforecast.Data.CityObject;
 import com.example.phelps.simpleforecast.R;
@@ -47,7 +46,6 @@ public class LaunchActivity extends Activity {
         setContentView(R.layout.activity_launch);
 
         cityObservable();
-
     }
 
     private void cityObservable() {
@@ -129,6 +127,4 @@ public class LaunchActivity extends Activity {
         return map;
     }
 
-    private void getMyCitys() {
-    }
 }

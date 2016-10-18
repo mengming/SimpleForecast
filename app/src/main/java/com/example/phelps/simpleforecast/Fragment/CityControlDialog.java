@@ -33,7 +33,7 @@ public class CityControlDialog extends DialogFragment {
     @BindView(R.id.city_control_list)
     ListView cityControlList;
 
-    private ArrayList cityList;
+    private ArrayList<String> list,cityList;
     private CityAdapter adapter;
 
     @Nullable
@@ -42,7 +42,9 @@ public class CityControlDialog extends DialogFragment {
         View view = inflater.inflate(R.layout.city_control, container, false);
         setCancelable(false);
         Bundle bundle = getArguments();
-        cityList = (ArrayList) bundle.getSerializable("cityList");
+        list = (ArrayList<String>) bundle.getSerializable("cityList");
+        cityList = new ArrayList<>();
+        cityList.addAll(list);
         ButterKnife.bind(this, view);
         adapter = new CityAdapter();
         cityControlList.setAdapter(adapter);
@@ -95,7 +97,7 @@ public class CityControlDialog extends DialogFragment {
                 viewHolder.btnCityDown = (ImageButton) convertView.findViewById(R.id.btn_city_down);
                 convertView.setTag(viewHolder);
             } else viewHolder = (ViewHolder) convertView.getTag();
-            viewHolder.cityText.setText(cityList.get(position).toString());
+            viewHolder.cityText.setText(cityList.get(position));
             viewHolder.btnDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -124,7 +126,7 @@ public class CityControlDialog extends DialogFragment {
                     if (position == cityList.size() - 1)
                         Toast.makeText(getActivity().getApplicationContext(), "已经是最后一个了", Toast.LENGTH_SHORT).show();
                     else {
-                        Collections.swap(cityList, position, position + 1);
+                        Collections.swap(list, position, position + 1);
                         adapter.notifyDataSetChanged();
                     }
                 }

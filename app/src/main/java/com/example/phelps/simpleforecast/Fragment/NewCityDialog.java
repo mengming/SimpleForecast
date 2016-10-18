@@ -7,16 +7,13 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.example.phelps.simpleforecast.Base.RxBus;
-import com.example.phelps.simpleforecast.Data.CityData;
 import com.example.phelps.simpleforecast.Data.CityEvent;
 import com.example.phelps.simpleforecast.R;
 import com.wx.wheelview.adapter.ArrayWheelAdapter;
 import com.wx.wheelview.widget.WheelView;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -32,8 +29,6 @@ public class NewCityDialog extends DialogFragment {
     WheelView provinceWheel;
     @BindView(R.id.city_wheel)
     WheelView cityWheel;
-    @BindView(R.id.btn_city)
-    Button btnCity;
 
     private HashMap<String, List<String>> cityMap;
     private List<String> provinceList;
@@ -48,14 +43,6 @@ public class NewCityDialog extends DialogFragment {
         cityMap = (HashMap<String, List<String>>) bundle.getSerializable("city");
         initWheelView();
         return view;
-    }
-
-    @OnClick(R.id.btn_city)
-    public void onClick() {
-        if (RxBus.getInstance().hasObservers()) {
-            RxBus.getInstance().post(new CityEvent(cityWheel.getSelectionItem().toString()));
-            dismiss();
-        }
     }
 
     private void initWheelView() {
@@ -79,4 +66,17 @@ public class NewCityDialog extends DialogFragment {
     }
 
 
+    @OnClick({R.id.btn_city_sure, R.id.btn_city_cancel})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_city_sure:
+                if (RxBus.getInstance().hasObservers()) {
+                    RxBus.getInstance().post(new CityEvent(cityWheel.getSelectionItem().toString()));
+                    dismiss();
+                }
+                break;
+            case R.id.btn_city_cancel: dismiss();
+                break;
+        }
+    }
 }

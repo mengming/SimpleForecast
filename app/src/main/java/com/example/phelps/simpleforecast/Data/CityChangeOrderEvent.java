@@ -2,6 +2,7 @@ package com.example.phelps.simpleforecast.Data;
 
 import com.example.phelps.simpleforecast.Fragment.CityFragment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,12 +11,12 @@ import java.util.List;
 
 public class CityChangeOrderEvent {
 
-    private List<String> cityList;
+    private ArrayList<String> cityList;
 
-    public CityChangeOrderEvent(List<String> cityList){
+    public CityChangeOrderEvent(ArrayList<String> cityList){
         this.cityList = cityList;
     }
-    public List<String> getCityList() {
+    public ArrayList<String> getCityList() {
         return cityList;
     }
 

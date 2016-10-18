@@ -17,16 +17,33 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/city_wheel"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
     </LinearLayout>
 
-    <Button
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:background="@android:color/transparent"
-        android:text="确定"
-        android:id="@+id/btn_city"/>
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:background="@android:color/transparent"
+            android:text="@string/sure"
+            android:id="@+id/btn_city_sure"
+            android:layout_weight="1"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:background="@android:color/transparent"
+            android:text="@string/cancel"
+            android:id="@+id/btn_city_cancel"
+            android:layout_weight="1"/>
+    </LinearLayout>
 </LinearLayout>
